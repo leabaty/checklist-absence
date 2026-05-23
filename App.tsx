@@ -1,20 +1,46 @@
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet } from 'react-native';
+import AppNavigator from './src/navigation/AppNavigator';
+import { HouseholdProvider } from './src/context/HouseholdContext';
+import { TaskProvider } from './src/context/TaskContext';
+import {
+  requestNotificationPermission,
+  scheduleAllNotifications,
+} from './src/notifications';
+import { Colors } from './src/theme/colors';
 
 export default function App() {
+  useEffect(() => {
+    (async () => {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await scheduleAllNotifications();
+      }
+    })();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <HouseholdProvider>
+          <TaskProvider>
+            <NavigationContainer>
+              <StatusBar style="dark" translucent={false} backgroundColor={Colors.background} />
+              <AppNavigator />
+            </NavigationContainer>
+          </TaskProvider>
+        </HouseholdProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
