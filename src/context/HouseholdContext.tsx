@@ -113,13 +113,14 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
       pseudo: currentUser.pseudo || 'Moi',
       joinedAt: new Date().toISOString(),
     };
-    // Save locally first — instant, no network needed
+    // Must confirm Firestore write before returning — the QR code is useless
+    // if the doc doesn't exist yet when phone 2 tries to join.
+    await withTimeout(
+      setDoc(doc(db, 'households', newId), { members: [member] }),
+      15_000
+    );
     await AsyncStorage.setItem(HOUSEHOLD_ID_KEY, newId);
     setHouseholdId(newId);
-    // Sync to Firestore in background; errors are non-fatal
-    setDoc(doc(db, 'households', newId), { members: [member] }).catch(() => {
-      console.warn('Firestore: foyer sync en attente de connexion');
-    });
     return newId;
   }, [currentUser]);
 

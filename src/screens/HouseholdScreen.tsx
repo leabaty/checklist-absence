@@ -49,8 +49,10 @@ export default function HouseholdScreen() {
     try {
       setIsCreating(true);
       await createHousehold();
-    } catch {
-      Alert.alert('Erreur', 'Impossible de créer le foyer. Vérifie ta connexion.');
+    } catch (err) {
+      console.error('[Foyer] createHousehold error:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      Alert.alert('Erreur', `Impossible de créer le foyer.\n\n${msg}`);
     } finally {
       setIsCreating(false);
     }
@@ -74,8 +76,10 @@ export default function HouseholdScreen() {
     setShowScanner(false);
     try {
       await joinHousehold(data);
-    } catch {
-      Alert.alert('QR invalide', 'Ce QR code ne correspond à aucun foyer.');
+    } catch (err) {
+      console.error('[Foyer] joinHousehold error:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      Alert.alert('QR invalide', `Impossible de rejoindre le foyer.\n\n${msg}`);
       setScanned(false);
     }
   }
